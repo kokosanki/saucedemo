@@ -19,6 +19,10 @@ export class CartPage {
     return this.items.filter({ hasText: productName });
   }
 
+  quantityOf(productName: string): Locator {
+    return this.item(productName).locator('[data-test="item-quantity"]');
+  }
+
   async openProduct(productName: string) {
     await this.item(productName)
       .locator('[data-test="inventory-item-name"]')

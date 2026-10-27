@@ -5,15 +5,18 @@ import { InventoryPage } from "../pages/InventoryPage";
 import { CartPage } from "../pages/CartPage";
 import { ProductDetailsPage } from "../pages/ProductDetailsPage";
 import { backpack, bikeLight, products } from "../data/products";
+import { messages } from "../data/messages";
 
 test.describe("cart when logged in", () => {
   let inventoryPage: InventoryPage;
   let cartPage: CartPage;
+  let productDetailsPage: ProductDetailsPage;
 
   test.beforeEach(async ({ page }) => {
     const loginPage = new LoginPage(page);
     inventoryPage = new InventoryPage(page);
     cartPage = new CartPage(page);
+    productDetailsPage = new ProductDetailsPage(page);
 
     await loginPage.goto();
     await loginPage.login(credentials.standardUser, credentials.password);
@@ -35,9 +38,8 @@ test.describe("cart when logged in", () => {
       await inventoryPage.openCart();
 
       await expect(cartPage.items).toHaveCount(1);
-      const item = cartPage.item(name);
-      await expect(item).toContainText(price);
-      await expect(item.locator('[data-test="item-quantity"]')).toHaveText("1");
+      await expect(cartPage.item(name)).toContainText(price);
+      await expect(cartPage.quantityOf(name)).toHaveText("1");
     });
   }
 
@@ -50,8 +52,7 @@ test.describe("cart when logged in", () => {
   });
 
   test("multiple added products are all listed in the cart", async () => {
-    await inventoryPage.addToCart(backpack.name);
-    await inventoryPage.addToCart(bikeLight.name);
+    await inventoryPage.addToCart(backpack.name, bikeLight.name);
     await inventoryPage.openCart();
 
     await expect(cartPage.items).toHaveCount(2);
@@ -69,8 +70,7 @@ test.describe("cart when logged in", () => {
   });
 
   test("cart keeps the other product after removing one in the cart", async () => {
-    await inventoryPage.addToCart(backpack.name);
-    await inventoryPage.addToCart(bikeLight.name);
+    await inventoryPage.addToCart(backpack.name, bikeLight.name);
     await inventoryPage.openCart();
 
     await cartPage.remove(backpack.name);
@@ -115,7 +115,6 @@ test.describe("cart when logged in", () => {
   test("product name in the cart opens the details of the same product", async ({
     page,
   }) => {
-    const productDetailsPage = new ProductDetailsPage(page);
     await inventoryPage.addToCart(backpack.name);
     await inventoryPage.openCart();
 
@@ -138,12 +137,12 @@ test.describe("cart when logged in", () => {
 
 test.describe("cart when logged out", () => {
   test("cart is not accessible without logging in", async ({ page }) => {
+    const loginPage = new LoginPage(page);
+
     await page.goto("/cart.html");
 
     await expect(page).toHaveURL("/");
-    await expect(page.locator('[data-test="error"]')).toHaveText(
-      "Epic sadface: You can only access '/cart.html' when you are logged in.",
-    );
+    await expect(loginPage.errorMessage).toHaveText(messages.cartRequiresLogin);
   });
 });
 

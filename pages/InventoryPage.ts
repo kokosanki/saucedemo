@@ -17,10 +17,12 @@ export class InventoryPage {
     return productName.toLowerCase().replace(/\s+/g, "-");
   }
 
-  async addToCart(productName: string) {
-    await this.page
-      .locator(`[data-test="add-to-cart-${this.slug(productName)}"]`)
-      .click();
+  async addToCart(...productNames: string[]) {
+    for (const productName of productNames) {
+      await this.page
+        .locator(`[data-test="add-to-cart-${this.slug(productName)}"]`)
+        .click();
+    }
   }
 
   async removeFromCart(productName: string) {
