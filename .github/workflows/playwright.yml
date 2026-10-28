@@ -8,6 +8,11 @@ jobs:
   test:
     timeout-minutes: 60
     runs-on: ubuntu-latest
+    env:
+      BASE_URL: ${{ vars.BASE_URL }}
+      STANDARD_USER: ${{ vars.STANDARD_USER }}
+      LOCKED_OUT_USER: ${{ vars.LOCKED_OUT_USER }}
+      PASSWORD: ${{ secrets.PASSWORD }}
     steps:
     - uses: actions/checkout@v4
     - uses: actions/setup-node@v4
